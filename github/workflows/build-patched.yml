@@ -1,0 +1,462 @@
+diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/.github/workflows/android-lite.yml MojoLauncher-3_openjdk/.github/workflows/android-lite.yml
+--- a/MojoLauncher-3_openjdk/.github/workflows/android-lite.yml	1970-01-01 00:00:00.000000000 +0000
++++ b/.github/workflows/android-lite.yml	2026-10-15 04:37:12.039636762 +0000
+@@ -0,0 +1,33 @@
++name: Android CI (lite)
++
++on:
++  push:
++  workflow_dispatch:
++
++jobs:
++  build:
++    runs-on: ubuntu-22.04
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v4
++        with:
++          submodules: recursive
++
++      - uses: gradle/actions/setup-gradle@v4
++        with:
++          gradle-version: "8.14.5"
++
++      - name: Set up JDK 17
++        uses: actions/setup-java@v4
++        with:
++          distribution: 'temurin'
++          java-version: '17'
++
++      - name: Build optimized APK (minified, not debuggable)
++        run: gradle :app_mojo:assembleFullProguardNoDebug
++
++      - name: Upload APK
++        uses: actions/upload-artifact@v4
++        with:
++          name: launcher-apk
++          path: app_mojo/build/outputs/apk/full/proguardNoDebug/*.apk
+diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/app_mojo/build.gradle MojoLauncher-3_openjdk/app_mojo/build.gradle
+--- a/MojoLauncher-3_openjdk/app_mojo/build.gradle	2026-10-14 13:58:40.000000000 +0000
++++ b/app_mojo/build.gradle	2026-10-15 04:37:12.039048945 +0000
+@@ -86,6 +86,9 @@
+         versionCode getDateSeconds()
+         versionName getVersionName()
+         multiDexEnabled false //important
++        ndk {
++            abiFilters 'arm64-v8a'
++        }
+         resValue 'string', 'curseforge_api_key', getCFApiKey()
+         resValue 'string', 'group_id', 'git.artdeell'
+     }
+diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/app_mojo/src/main/assets/default.json MojoLauncher-3_openjdk/app_mojo/src/main/assets/default.json
+--- a/MojoLauncher-3_openjdk/app_mojo/src/main/assets/default.json	2026-10-14 13:58:40.000000000 +0000
++++ b/app_mojo/src/main/assets/default.json	2026-10-15 04:37:20.987217441 +0000
+@@ -1 +1,236 @@
+-{"mControlDataList":[{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 3 + ${width} * 2","dynamicY":"${margin}","height":30,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[-1,0,0,0],"name":"Keyboard","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":80},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin}","dynamicY":"${bottom} - ${margin}","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[-2,0,0,0],"name":"GUI","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin}","dynamicY":"${screen_height} - ${margin} * 3 - ${height} * 3","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[-3,0,0,0],"name":"PRI","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 3 + ${width} * 2","dynamicY":"${screen_height} - ${margin} * 3 - ${height} * 3","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[-4,0,0,0],"name":"SEC","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${right}","dynamicY":"${margin}","height":30,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[-5,0,0,0],"name":"Mouse","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":80},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin}","dynamicY":"${margin}","height":30,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[292,0,0,0],"name":"Debug","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":80},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 2 + ${width}","dynamicY":"${margin}","height":30,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[84,0,0,0],"name":"Chat","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":80},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 4 + ${width} * 3","dynamicY":"${margin}","height":30,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[258,0,0,0],"name":"Tab","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":80},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin}","dynamicY":"${height} + ${margin}","height":30,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[294,0,0,0],"name":"3rd","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":80},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 2 + ${width}","dynamicY":"${bottom} - ${margin} * 3 - ${height} * 2","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[87,0,0,0],"name":"▲","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin}","dynamicY":"${bottom} - ${margin} * 2 - ${height}","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[65,0,0,0],"name":"◀","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 2 + ${width}","dynamicY":"${bottom} - ${margin}","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[83,0,0,0],"name":"▼","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 3 + ${width} * 2","dynamicY":"${bottom} - ${margin} * 2 - ${height}","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[68,0,0,0],"name":"▶","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 3 + ${width} * 2","dynamicY":"${bottom} - ${margin}","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[69,0,0,0],"name":"Inv","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${margin} * 2 + ${width}","dynamicY":"${screen_height} - ${margin} * 2 - ${height} * 2","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":true,"keycodes":[340,0,0,0],"name":"◇","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50},{"bgColor":1291845632,"cornerRadius":0,"dynamicX":"${right} - ${margin} * 2 - ${width}","dynamicY":"${bottom} - ${margin} * 2 - ${height}","height":50,"isDynamicBtn":false,"isHideable":false,"isSwipeable":false,"isToggle":false,"keycodes":[32,0,0,0],"name":"⬛","opacity":1,"passThruEnabled":false,"strokeColor":-1,"strokeWidth":0,"width":50}],"mDrawerDataList":[],"scaledAt":100,"version":4}
+\ No newline at end of file
++{
++  "mControlDataList": [
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 50,
++      "dynamicX": "${right} - ${margin} * 2",
++      "dynamicY": "${bottom} - ${margin} * 2",
++      "height": 64,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        32,
++        0,
++        0,
++        0
++      ],
++      "name": "Jump",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 64,
++      "displayInGame": true,
++      "displayInMenu": false
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 50,
++      "dynamicX": "${right} - 64 - ${margin} * 3",
++      "dynamicY": "${bottom} - ${margin} * 2",
++      "height": 48,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": true,
++      "keycodes": [
++        340,
++        0,
++        0,
++        0
++      ],
++      "name": "Sneak",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 48,
++      "displayInGame": true,
++      "displayInMenu": false
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 0,
++      "dynamicX": "${margin}",
++      "dynamicY": "${margin}",
++      "height": 34,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        256,
++        0,
++        0,
++        0
++      ],
++      "name": "II",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 50,
++      "displayInGame": true,
++      "displayInMenu": true
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 0,
++      "dynamicX": "${margin} * 2 + ${width}",
++      "dynamicY": "${margin}",
++      "height": 34,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        84,
++        0,
++        0,
++        0
++      ],
++      "name": "Chat",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 50,
++      "displayInGame": true,
++      "displayInMenu": false
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 0,
++      "dynamicX": "${right} - ${margin}",
++      "dynamicY": "${margin}",
++      "height": 34,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        69,
++        0,
++        0,
++        0
++      ],
++      "name": "Inv",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 50,
++      "displayInGame": true,
++      "displayInMenu": true
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 0,
++      "dynamicX": "${right} - ${margin} * 2 - ${width}",
++      "dynamicY": "${margin}",
++      "height": 34,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        294,
++        0,
++        0,
++        0
++      ],
++      "name": "F5",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 50,
++      "displayInGame": true,
++      "displayInMenu": false
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 0,
++      "dynamicX": "${screen_width} / 2 - ${width} / 2",
++      "dynamicY": "${margin}",
++      "height": 30,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        -1,
++        0,
++        0,
++        0
++      ],
++      "name": "Kbd",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 60,
++      "displayInGame": true,
++      "displayInMenu": true
++    },
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 0,
++      "dynamicX": "${margin} * 3 + ${width} * 2",
++      "dynamicY": "${margin}",
++      "height": 34,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        -2,
++        0,
++        0,
++        0
++      ],
++      "name": "GUI",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 50,
++      "displayInGame": true,
++      "displayInMenu": true
++    }
++  ],
++  "mDrawerDataList": [],
++  "mJoystickDataList": [
++    {
++      "bgColor": 1291845632,
++      "cornerRadius": 100,
++      "dynamicX": "${margin} * 2",
++      "dynamicY": "${bottom} - ${margin} * 2",
++      "height": 130,
++      "isDynamicBtn": false,
++      "isHideable": false,
++      "isSwipeable": false,
++      "isToggle": false,
++      "keycodes": [
++        0,
++        0,
++        0,
++        0
++      ],
++      "name": "Move",
++      "opacity": 1,
++      "passThruEnabled": false,
++      "strokeColor": -1,
++      "strokeWidth": 1,
++      "width": 130,
++      "displayInGame": true,
++      "displayInMenu": false,
++      "forwardLock": true,
++      "absolute": false
++    }
++  ],
++  "scaledAt": 100,
++  "version": 9
++}
+\ No newline at end of file
+diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/app_mojo/src/main/assets/options.txt MojoLauncher-3_openjdk/app_mojo/src/main/assets/options.txt
+--- a/MojoLauncher-3_openjdk/app_mojo/src/main/assets/options.txt	2026-10-14 13:58:40.000000000 +0000
++++ b/app_mojo/src/main/assets/options.txt	2026-10-15 04:37:12.039513046 +0000
+@@ -11,7 +11,7 @@
+ bobView:false
+ anaglyph3d:false
+ advancedOpengl:false
+-maxFps:260
++maxFps:60
+ fboEnable:true
+ difficulty:2
+ fancyGraphics:false
+@@ -24,7 +24,7 @@
+ chatLinks:true
+ chatLinksPrompt:true
+ chatOpacity:1.0
+-snooperEnabled:true
++snooperEnabled:false
+ fullscreen:true
+ enableVsync:false
+ hideServerAddress:false
+diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/app_mojo/src/main/java/git/artdeell/mojo/game/InGUIEventProcessor.java MojoLauncher-3_openjdk/app_mojo/src/main/java/git/artdeell/mojo/game/InGUIEventProcessor.java
+--- a/MojoLauncher-3_openjdk/app_mojo/src/main/java/git/artdeell/mojo/game/InGUIEventProcessor.java	2026-10-14 13:58:40.000000000 +0000
++++ b/app_mojo/src/main/java/git/artdeell/mojo/game/InGUIEventProcessor.java	2026-10-15 04:37:20.984729562 +0000
+@@ -1,5 +1,7 @@
+ package git.artdeell.mojo.game;
+ 
++import android.os.Handler;
++import android.os.Looper;
+ import android.view.MotionEvent;
+ import android.view.View;
+ 
+@@ -20,6 +22,9 @@
+     private final TapDetector mSingleTapDetector;
+     private View mTouchpad;
+     private boolean mIsMouseDown = false;
++    private boolean mIsRightDown = false;
++    private final Handler mHoldHandler = new Handler(Looper.getMainLooper());
++    private final Runnable mHoldRunnable = this::onHold;
+     private float mStartX, mStartY;
+     private final Scroller mScroller = new Scroller(FINGER_SCROLL_THRESHOLD);
+ 
+@@ -40,7 +45,10 @@
+ 
+                     // disabled gestures means no scrolling possible, send gesture early
+                     if (LauncherPreferences.PREF_DISABLE_GESTURES) enableMouse();
+-                    else setGestureStart(motionEvent);
++                    else {
++                        setGestureStart(motionEvent);
++                        mHoldHandler.postDelayed(mHoldRunnable, LauncherPreferences.PREF_LONGPRESS_TRIGGER);
++                    }
+                 }
+                 break;
+ 
+@@ -55,23 +63,29 @@
+                         float mainPointerY = motionEvent.getY(pointerIndex);
+                         sendTouchCoordinates(mainPointerX, mainPointerY);
+ 
+-                        if(!mIsMouseDown) {
++                        if(!mIsMouseDown && !mIsRightDown) {
+                             if(!hasGestureStarted()) setGestureStart(motionEvent);
+                             if(!LeftClickGesture.isFingerStill(mStartX, mStartY, mainPointerX, mainPointerY, FINGER_STILL_THRESHOLD))
+                                 enableMouse();
+                         }
+ 
+                     }
+-                } else mScroller.performScroll(mTracker.getMotionVector());
++                } else {
++                    cancelHold();
++                    mScroller.performScroll(mTracker.getMotionVector());
++                }
+                 break;
+ 
+             case MotionEvent.ACTION_CANCEL:
+             case MotionEvent.ACTION_UP:
+                 mScroller.resetScrollOvershoot();
+                 mTracker.cancelTracking();
++                cancelHold();
++                boolean wasRight = mIsRightDown;
++                if(wasRight) disableRight();
+ 
+                 // Handle single tap on gestures
+-                if((!LauncherPreferences.PREF_DISABLE_GESTURES || touchpadDisplayed()) && !mIsMouseDown && singleTap) {
++                if((!LauncherPreferences.PREF_DISABLE_GESTURES || touchpadDisplayed()) && !mIsMouseDown && !wasRight && singleTap) {
+                     CallbackBridge.performClick(MotionEvent.BUTTON_PRIMARY);
+                 }
+ 
+@@ -92,6 +106,7 @@
+     }
+ 
+     private void enableMouse() {
++        cancelHold();
+         CallbackBridge.sendMouseButton(MotionEvent.BUTTON_PRIMARY, true);
+         mIsMouseDown = true;
+     }
+@@ -101,6 +116,21 @@
+         mIsMouseDown = false;
+     }
+ 
++    private void onHold() {
++        if(mIsMouseDown || mIsRightDown || !hasGestureStarted()) return;
++        mIsRightDown = true;
++        CallbackBridge.sendMouseButton(MotionEvent.BUTTON_SECONDARY, true);
++    }
++
++    private void disableRight() {
++        CallbackBridge.sendMouseButton(MotionEvent.BUTTON_SECONDARY, false);
++        mIsRightDown = false;
++    }
++
++    private void cancelHold() {
++        mHoldHandler.removeCallbacks(mHoldRunnable);
++    }
++
+     private void setGestureStart(MotionEvent event) {
+         mStartX = event.getX();
+         mStartY = event.getY();
+@@ -117,6 +147,8 @@
+     @Override
+     public void cancelPendingActions() {
+         mScroller.resetScrollOvershoot();
++        cancelHold();
+         if(mIsMouseDown) disableMouse();
++        if(mIsRightDown) disableRight();
+     }
+ }
+diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/app_mojo/src/main/java/git/artdeell/mojo/utils/jre/JavaRunner.java MojoLauncher-3_openjdk/app_mojo/src/main/java/git/artdeell/mojo/utils/jre/JavaRunner.java
+--- a/MojoLauncher-3_openjdk/app_mojo/src/main/java/git/artdeell/mojo/utils/jre/JavaRunner.java	2026-10-14 13:58:40.000000000 +0000
++++ b/app_mojo/src/main/java/git/artdeell/mojo/utils/jre/JavaRunner.java	2026-10-15 04:37:12.038467758 +0000
+@@ -143,9 +143,39 @@
+ 
+         //Add all the arguments
+         userArguments.addAll(additionalArguments);
++        addPerformanceDefaults(userArguments);
+         return userArguments;
+     }
+ 
++    /**
++     * Default GC and runtime tuning for Java 8 games. Skipped for any option the user already set.
++     * IgnoreUnrecognizedVMOptions keeps the VM alive if a build of the runtime lacks a flag.
++     */
++    private static void addPerformanceDefaults(List<String> args) {
++        boolean userGc = false;
++        for(String arg : args) {
++            if(arg.startsWith("-XX:+Use") && arg.endsWith("GC")) {
++                userGc = true;
++                break;
++            }
++        }
++        args.add(0, "-XX:+IgnoreUnrecognizedVMOptions");
++        if(!userGc) {
++            if(LauncherPreferences.PREF_RAM_ALLOCATION <= 2048) {
++                // Small heap: no GC worker threads competing with the render thread
++                args.add("-XX:+UseSerialGC");
++                args.add("-XX:NewRatio=1");
++            } else {
++                args.add("-XX:+UseG1GC");
++                args.add("-XX:MaxGCPauseMillis=40");
++            }
++        }
++        args.add("-XX:+DisableExplicitGC");
++        args.add("-XX:-UsePerfData");
++        args.add("-XX:ReservedCodeCacheSize=128m");
++        args.add("-Djava.net.preferIPv4Stack=true");
++    }
++
+     private static File getVmPath(File runtimeHomeDir, String arch, String flavor) {
+         if(arch != null) return new File(runtimeHomeDir, "lib/"+arch+"/"+flavor+"/libjvm.so");
+         else return new File(runtimeHomeDir, "lib/"+flavor+"/libjvm.so");
