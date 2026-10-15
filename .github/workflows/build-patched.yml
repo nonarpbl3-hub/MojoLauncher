@@ -1,1 +1,35 @@
+name: Build patched APK
 
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-patched.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Apply patch
+        run: patch -p1 < bedrock-fast-all.patch
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.5"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build (optimized, fallback to debug)
+        run: gradle :app_mojo:assembleFullProguardNoDebug || gradle :app_mojo:assembleFullDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: launcher-apk
+          path: app_mojo/build/outputs/apk/full/**/*.apk
