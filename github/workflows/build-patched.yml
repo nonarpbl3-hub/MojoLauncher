@@ -460,3 +460,4 @@ diff -ruN -x '*.orig' -x '*.new' orig/MojoLauncher-3_openjdk/app_mojo/src/main/j
      private static File getVmPath(File runtimeHomeDir, String arch, String flavor) {
          if(arch != null) return new File(runtimeHomeDir, "lib/"+arch+"/"+flavor+"/libjvm.so");
          else return new File(runtimeHomeDir, "lib/"+flavor+"/libjvm.so");
+
